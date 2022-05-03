@@ -7,10 +7,11 @@
         class="p-2 mr-2 flex-grow text-xl font-bold w-full"
         :value="task.name"
         @change="
-          updateTaskProperty($event, {
+          updateTaskProperty({
             columnName: route.params.column,
             id: route.params.id,
             field: 'name',
+            value: $event.target.value,
           })
         "
       />
@@ -20,10 +21,11 @@
         class="relative bg-transparent px-2 border mt-2 h-64 border-none leading-normal w-full"
         :value="task.description"
         @change="
-          updateTaskProperty($event, {
+          updateTaskProperty({
             columnName: route.params.column,
             id: route.params.id,
             field: 'description',
+            value: $event.target.value,
           })
         "
       />

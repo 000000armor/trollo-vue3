@@ -1,17 +1,28 @@
 <template>
   <div class="p-4 bg-teal-200 h-full overflow-auto">
     <div class="flex flex-row items-start">
-      <div v-for="columnName of columnNames" :key="columnName" class="column">
+      <div
+        v-for="columnName of columnNames"
+        :key="columnName"
+        class="column"
+        @drop="dropTask($event, columnName)"
+        @dragover.prevent
+        @dragenter.prevent
+      >
         <h4 class="flex items-center mb-2 font-bold">
           {{ columnName }}
         </h4>
 
         <TransitionGroup name="tasks" tag="ul">
           <li
-            v-for="task in board.columns[columnName].tasks"
+            v-for="(task, taskIndex) in board.columns[columnName].tasks"
             :key="task.id"
             class="task"
             @click="goToTask(columnName, task.id)"
+            draggable="true"
+            @dragstart="
+              pickupTask($event, { taskIndex, fromColumnName: columnName })
+            "
           >
             <div class="w-full relative">
               <span class="w-full flex-shrink-0 font-bold">{{
@@ -61,7 +72,7 @@ import { useBoardStore } from "../stores/boardStore";
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-const { board, createTask, removeTask } = useBoardStore();
+const { board, createTask, removeTask, pickupTask, dropTask } = useBoardStore();
 const route = useRoute();
 const router = useRouter();
 
