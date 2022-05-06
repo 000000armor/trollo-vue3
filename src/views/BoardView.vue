@@ -2,26 +2,26 @@
   <div class="p-4 bg-teal-200 h-full overflow-auto">
     <div class="flex flex-row items-start">
       <div
-        v-for="columnName of columnNames"
-        :key="columnName"
+        v-for="column of columns"
+        :key="column.name"
         class="column"
-        @drop="dropTask($event, columnName)"
+        @drop="dropTask($event, column.name)"
         @dragover.prevent
         @dragenter.prevent
       >
         <h4 class="flex items-center mb-2 font-bold">
-          {{ columnName }}
+          {{ column.name }}
         </h4>
 
         <TransitionGroup name="tasks" tag="ul">
           <li
-            v-for="(task, taskIndex) in board.columns[columnName].tasks"
+            v-for="(task, taskIndex) in getTasks(column.name)"
             :key="task.id"
             class="task"
-            @click="goToTask(columnName, task.id)"
+            @click="goToTask(column.name, task.id)"
             draggable="true"
             @dragstart="
-              pickupTask($event, { taskIndex, fromColumnName: columnName })
+              pickupTask($event, { taskIndex, fromColumnName: column.name })
             "
           >
             <div class="w-full relative">
@@ -31,7 +31,7 @@
 
               <p
                 class="cursor-pointer absolute top-0 right-0"
-                @click.stop="removeTask(columnName, task.id)"
+                @click.stop="removeTask(column.name, task.id)"
               >
                 ❌
               </p>
@@ -45,7 +45,7 @@
               type="text"
               class="block p-2 w-full bg-transparent"
               placeholder="+ Enter new task"
-              @keyup.enter="createTask($event, columnName)"
+              @keyup.enter="createTask($event, column.name)"
             />
           </li>
         </TransitionGroup>
@@ -72,11 +72,13 @@ import { useBoardStore } from "../stores/boardStore";
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-const { board, createTask, removeTask, pickupTask, dropTask } = useBoardStore();
+const { board, createTask, removeTask, pickupTask, dropTask, getTasks } =
+  useBoardStore();
+
 const route = useRoute();
 const router = useRouter();
 
-const columnNames = computed(() => Object.keys(board.columns));
+const columns = computed(() => board.columns);
 const isTaskOpened = computed(() => route.name === "task");
 
 const goToTask = (column, id) =>
@@ -93,27 +95,5 @@ const closeModal = () => router.push({ name: "board" });
 
 .task {
   @apply flex items-center flex-wrap shadow mb-2 py-2 px-2 rounded bg-white text-gray-800 no-underline;
-}
-
-.task-bg {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.tasks-move, /* apply transition to moving elements */
-.tasks-enter-active,
-.tasks-leave-active {
-  transition: all 0.5s ease;
-}
-
-.tasks-enter-from,
-.tasks-leave-to {
-  opacity: 0;
-  transform: translateX(30px);
-}
-
-/* ensure leaving items are taken out of layout flow so that moving
-   animations can be calculated correctly. */
-.tasks-leave-active {
-  position: absolute;
 }
 </style>

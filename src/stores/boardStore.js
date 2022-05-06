@@ -9,20 +9,31 @@ export const useBoardStore = defineStore({
     board: useStorage("board", initialBoardData),
   }),
   getters: {
-    getTask: (state) => (columnName, id) => {
-      console.log(columnName, id);
-      return state.board.columns[columnName]?.tasks.find(
-        (task) => task.id === id
-      );
-    },
     columns: (state) => state.board.columns,
+    getTask() {
+      return (columnName, id) => {
+        const tasks = this.columns?.find((column) => column.name).tasks;
+
+        return tasks.find((task) => id === task.id);
+      };
+    },
+    getColumn() {
+      return (columnName) => {
+        return this.columns.find((column) => column.name === columnName);
+      };
+    },
+    getTasks() {
+      return (columnName) => {
+        return this.columns.find((column) => column.name === columnName).tasks;
+      };
+    },
   },
   actions: {
     createTask(event, columnName) {
       let value = event.target.value;
 
       if (value) {
-        this.columns[columnName].tasks.push({
+        this.getTasks(columnName).push({
           id: uuid(),
           name: value,
         });
@@ -31,23 +42,18 @@ export const useBoardStore = defineStore({
       }
     },
     removeTask(columnName, id) {
-      const column = this.columns[columnName];
+      const column = this.getColumn(columnName);
       column.tasks = column.tasks.filter((task) => task.id !== id);
     },
     updateTaskProperty({ columnName, id, field, value }) {
-      const task = this.columns[columnName].tasks.find(
-        (task) => task.id === id
-      );
+      const task = this.getTasks(columnName).find((task) => task.id === id);
 
       task[field] = value;
     },
     moveTask({ fromColumnName, toColumnName, taskIndex }) {
-      const taskToMove = this.columns[fromColumnName].tasks.splice(
-        taskIndex,
-        1
-      )[0];
+      const taskToMove = this.getTasks(fromColumnName).splice(taskIndex, 1)[0];
 
-      this.columns[toColumnName].tasks.push(taskToMove);
+      this.getTasks(toColumnName).push(taskToMove);
     },
     pickupTask(event, { taskIndex, fromColumnName }) {
       event.dataTransfer.effectAllowed = "move";
