@@ -6,8 +6,8 @@
         :key="column.name"
         class="column"
         draggable="true"
-        @dragstart.self="moveColumn"
-        @drop="dropTask($event, { toColumnIndex: columnIndex })"
+        @dragstart.self="pickupColumn($event, { fromColumnIndex: columnIndex })"
+        @drop="dropItem($event, { toColumnIndex: columnIndex })"
         @dragover.prevent
         @dragenter.prevent
       >
@@ -22,9 +22,17 @@
             class="task"
             @click="goToTask(columnIndex, task.id)"
             draggable="true"
-            @dragstart="
+            @dragstart.self="
               pickupTask($event, { taskIndex, fromColumnIndex: columnIndex })
             "
+            @drop.stop="
+              dropItem($event, {
+                toColumnIndex: columnIndex,
+                toTaskIndex: taskIndex,
+              })
+            "
+            @dragover.prevent
+            @dragenter.prevent
           >
             <div class="w-full relative">
               <span class="w-full flex-shrink-0 font-bold">{{
@@ -53,7 +61,7 @@
         </TransitionGroup>
       </div>
     </div>
-    <!--    move modal to separate module -->
+    <!--  TODO:  move modal to separate module -->
     <Teleport to="#modal">
       <div
         id="defaultModal"
@@ -74,7 +82,7 @@ import { useBoardStore } from "../stores/boardStore";
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-const { board, createTask, removeTask, pickupTask, dropTask, moveColumn } =
+const { board, createTask, removeTask, pickupTask, pickupColumn, dropItem } =
   useBoardStore();
 
 const route = useRoute();

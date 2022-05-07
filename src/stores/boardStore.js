@@ -42,13 +42,17 @@ export const useBoardStore = defineStore({
 
       task[field] = value;
     },
-    moveTask({ fromColumnIndex, toColumnIndex, taskIndex }) {
+    moveTask({ fromColumnIndex, toColumnIndex, fromTaskIndex, toTaskIndex }) {
       const taskToMove = this.columns[fromColumnIndex].tasks.splice(
-        taskIndex,
+        fromTaskIndex,
         1
       )[0];
 
-      this.columns[toColumnIndex].tasks.push(taskToMove);
+      const toTasks = this.columns[toColumnIndex].tasks;
+      const toTaskIndexNormalized =
+        toTaskIndex === undefined ? toTasks.length : toTaskIndex;
+
+      toTasks.splice(toTaskIndexNormalized, 0, taskToMove);
     },
     moveColumn({ fromColumnIndex, toColumnIndex }) {
       const columnToMove = this.columns.splice(fromColumnIndex, 1)[0];
@@ -63,17 +67,37 @@ export const useBoardStore = defineStore({
       event.dataTransfer.setData("from-column-index", fromColumnIndex);
       event.dataTransfer.setData("type", "task");
     },
-    pickupColumn(event) {
+    pickupColumn(event, { fromColumnIndex }) {
       event.dataTransfer.effectAllowed = "move";
       event.dataTransfer.dropEffect = "move";
 
+      event.dataTransfer.setData("from-column-index", fromColumnIndex);
       event.dataTransfer.setData("type", "column");
     },
-    dropTask(event, { toColumnIndex }) {
-      const taskIndex = event.dataTransfer.getData("task-index");
+    dropItem(event, payload) {
+      const type = event.dataTransfer.getData("type");
+
+      console.log(type);
+
+      type === "task"
+        ? this.dropTask(event, payload)
+        : this.dropColumn(event, payload);
+    },
+    dropTask(event, { toColumnIndex, toTaskIndex }) {
+      const fromTaskIndex = event.dataTransfer.getData("task-index");
       const fromColumnIndex = event.dataTransfer.getData("from-column-index");
 
-      this.moveTask({ fromColumnIndex, toColumnIndex, taskIndex });
+      this.moveTask({
+        fromColumnIndex,
+        toColumnIndex,
+        fromTaskIndex,
+        toTaskIndex,
+      });
+    },
+    dropColumn(event, { toColumnIndex }) {
+      const fromColumnIndex = event.dataTransfer.getData("from-column-index");
+
+      this.moveColumn({ fromColumnIndex, toColumnIndex });
     },
   },
 });
