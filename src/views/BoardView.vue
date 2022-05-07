@@ -54,11 +54,19 @@
             <input
               type="text"
               class="block p-2 w-full bg-transparent"
-              placeholder="+ Enter new task"
+              placeholder="+ Enter new task name"
               @keyup.enter="createTask($event, { columnIndex })"
             />
           </li>
         </TransitionGroup>
+      </div>
+      <div class="column flex">
+        <input
+          class="block p-2 w-full bg-transparent"
+          type="text"
+          @keyup.enter="createColumn($event)"
+          placeholder="+ Enter new column name"
+        />
       </div>
     </div>
     <!--  TODO:  move modal to separate module -->
@@ -82,8 +90,15 @@ import { useBoardStore } from "../stores/boardStore";
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-const { board, createTask, removeTask, pickupTask, pickupColumn, dropItem } =
-  useBoardStore();
+const {
+  board,
+  createTask,
+  createColumn,
+  removeTask,
+  pickupTask,
+  pickupColumn,
+  dropItem,
+} = useBoardStore();
 
 const route = useRoute();
 const router = useRouter();

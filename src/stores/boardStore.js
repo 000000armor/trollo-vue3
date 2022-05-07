@@ -19,13 +19,24 @@ export const useBoardStore = defineStore({
     },
   },
   actions: {
-    createTask(event, { columnIndex }) {
-      let value = event.target.value;
+    createColumn(event) {
+      const name = event.target.value;
+      if (name) {
+        this.columns.push({
+          name,
+          tasks: [],
+        });
 
-      if (value) {
+        event.target.value = "";
+      }
+    },
+    createTask(event, { columnIndex }) {
+      const name = event.target.value;
+
+      if (name) {
         this.columns[columnIndex].tasks.push({
+          name,
           id: uuid(),
-          name: value,
         });
 
         event.target.value = "";
