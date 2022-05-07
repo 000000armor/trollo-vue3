@@ -2,10 +2,12 @@
   <div class="p-4 bg-teal-200 h-full overflow-auto">
     <div class="flex flex-row items-start">
       <div
-        v-for="column of columns"
+        v-for="(column, columnIndex) of columns"
         :key="column.name"
         class="column"
-        @drop="dropTask($event, column.name)"
+        draggable="true"
+        @dragstart.self="moveColumn"
+        @drop="dropTask($event, { toColumnIndex: columnIndex })"
         @dragover.prevent
         @dragenter.prevent
       >
@@ -15,13 +17,13 @@
 
         <TransitionGroup name="tasks" tag="ul">
           <li
-            v-for="(task, taskIndex) in getTasks(column.name)"
+            v-for="(task, taskIndex) in column.tasks"
             :key="task.id"
             class="task"
-            @click="goToTask(column.name, task.id)"
+            @click="goToTask(columnIndex, task.id)"
             draggable="true"
             @dragstart="
-              pickupTask($event, { taskIndex, fromColumnName: column.name })
+              pickupTask($event, { taskIndex, fromColumnIndex: columnIndex })
             "
           >
             <div class="w-full relative">
@@ -31,7 +33,7 @@
 
               <p
                 class="cursor-pointer absolute top-0 right-0"
-                @click.stop="removeTask(column.name, task.id)"
+                @click.stop="removeTask({ columnIndex, taskId: task.id })"
               >
                 ❌
               </p>
@@ -45,7 +47,7 @@
               type="text"
               class="block p-2 w-full bg-transparent"
               placeholder="+ Enter new task"
-              @keyup.enter="createTask($event, column.name)"
+              @keyup.enter="createTask($event, { columnIndex })"
             />
           </li>
         </TransitionGroup>
@@ -72,7 +74,7 @@ import { useBoardStore } from "../stores/boardStore";
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-const { board, createTask, removeTask, pickupTask, dropTask, getTasks } =
+const { board, createTask, removeTask, pickupTask, dropTask, moveColumn } =
   useBoardStore();
 
 const route = useRoute();
@@ -81,8 +83,8 @@ const router = useRouter();
 const columns = computed(() => board.columns);
 const isTaskOpened = computed(() => route.name === "task");
 
-const goToTask = (column, id) =>
-  router.push({ name: "task", params: { column, id } });
+const goToTask = (columnIndex, taskId) =>
+  router.push({ name: "task", params: { columnIndex, taskId } });
 
 const closeModal = () => router.push({ name: "board" });
 </script>

@@ -11,29 +11,19 @@ export const useBoardStore = defineStore({
   getters: {
     columns: (state) => state.board.columns,
     getTask() {
-      return (columnName, id) => {
-        const tasks = this.columns?.find((column) => column.name).tasks;
+      return (columnIndex, taskId) => {
+        const tasks = this.columns[columnIndex].tasks;
 
-        return tasks.find((task) => id === task.id);
-      };
-    },
-    getColumn() {
-      return (columnName) => {
-        return this.columns.find((column) => column.name === columnName);
-      };
-    },
-    getTasks() {
-      return (columnName) => {
-        return this.columns.find((column) => column.name === columnName).tasks;
+        return tasks.find((task) => taskId === task.id);
       };
     },
   },
   actions: {
-    createTask(event, columnName) {
+    createTask(event, { columnIndex }) {
       let value = event.target.value;
 
       if (value) {
-        this.getTasks(columnName).push({
+        this.columns[columnIndex].tasks.push({
           id: uuid(),
           name: value,
         });
@@ -41,32 +31,49 @@ export const useBoardStore = defineStore({
         event.target.value = "";
       }
     },
-    removeTask(columnName, id) {
-      const column = this.getColumn(columnName);
-      column.tasks = column.tasks.filter((task) => task.id !== id);
+    removeTask({ columnIndex, taskId }) {
+      const column = this.columns[columnIndex];
+      column.tasks = column.tasks.filter((task) => task.id !== taskId);
     },
-    updateTaskProperty({ columnName, id, field, value }) {
-      const task = this.getTasks(columnName).find((task) => task.id === id);
+    updateTaskProperty({ columnIndex, taskId, field, value }) {
+      const task = this.columns[columnIndex].tasks.find(
+        (task) => task.id === taskId
+      );
 
       task[field] = value;
     },
-    moveTask({ fromColumnName, toColumnName, taskIndex }) {
-      const taskToMove = this.getTasks(fromColumnName).splice(taskIndex, 1)[0];
+    moveTask({ fromColumnIndex, toColumnIndex, taskIndex }) {
+      const taskToMove = this.columns[fromColumnIndex].tasks.splice(
+        taskIndex,
+        1
+      )[0];
 
-      this.getTasks(toColumnName).push(taskToMove);
+      this.columns[toColumnIndex].tasks.push(taskToMove);
     },
-    pickupTask(event, { taskIndex, fromColumnName }) {
+    moveColumn({ fromColumnIndex, toColumnIndex }) {
+      const columnToMove = this.columns.splice(fromColumnIndex, 1)[0];
+
+      this.columns.splice(toColumnIndex, 0, columnToMove);
+    },
+    pickupTask(event, { taskIndex, fromColumnIndex }) {
       event.dataTransfer.effectAllowed = "move";
       event.dataTransfer.dropEffect = "move";
 
       event.dataTransfer.setData("task-index", taskIndex);
-      event.dataTransfer.setData("from-column-name", fromColumnName);
+      event.dataTransfer.setData("from-column-index", fromColumnIndex);
+      event.dataTransfer.setData("type", "task");
     },
-    dropTask(event, toColumnName) {
-      const taskIndex = event.dataTransfer.getData("task-index");
-      const fromColumnName = event.dataTransfer.getData("from-column-name");
+    pickupColumn(event) {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.dropEffect = "move";
 
-      this.moveTask({ fromColumnName, toColumnName, taskIndex });
+      event.dataTransfer.setData("type", "column");
+    },
+    dropTask(event, { toColumnIndex }) {
+      const taskIndex = event.dataTransfer.getData("task-index");
+      const fromColumnIndex = event.dataTransfer.getData("from-column-index");
+
+      this.moveTask({ fromColumnIndex, toColumnIndex, taskIndex });
     },
   },
 });

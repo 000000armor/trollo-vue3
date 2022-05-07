@@ -12,7 +12,7 @@ const router = createRouter({
       children: [
         {
           name: "task",
-          path: "task/:column/:id",
+          path: "task/:columnIndex/:taskId",
           component: TaskView,
         },
       ],

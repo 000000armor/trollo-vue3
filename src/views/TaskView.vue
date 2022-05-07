@@ -8,8 +8,8 @@
         :value="task.name"
         @change="
           updateTaskProperty({
-            columnName: route.params.column,
-            id: route.params.id,
+            columnIndex: route.params.columnIndex,
+            taskId: route.params.taskId,
             field: 'name',
             value: $event.target.value,
           })
@@ -22,8 +22,8 @@
         :value="task.description"
         @change="
           updateTaskProperty({
-            columnName: route.params.column,
-            id: route.params.id,
+            columnIndex: route.params.columnIndex,
+            taskId: route.params.taskId,
             field: 'description',
             value: $event.target.value,
           })
@@ -41,7 +41,7 @@ import { computed } from "vue";
 const { getTask, updateTaskProperty } = useBoardStore();
 const route = useRoute();
 const task = computed(() => {
-  return getTask(route.params.column, route.params.id);
+  return getTask(route.params.columnIndex, route.params.taskId);
 });
 </script>
 
