@@ -88,8 +88,6 @@ export const useBoardStore = defineStore({
     dropItem(event, payload) {
       const type = event.dataTransfer.getData("type");
 
-      console.log(type);
-
       type === "task"
         ? this.dropTask(event, payload)
         : this.dropColumn(event, payload);
