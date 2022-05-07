@@ -41,5 +41,17 @@ export default {
         },
       ],
     },
+    {
+      name: "done",
+      tasks: [
+        {
+          description:
+            "some textsome textsome textsome textsome textsome textsome text",
+          name: "first task",
+          id: uuid(),
+          userAssigned: null,
+        },
+      ],
+    },
   ],
 };
