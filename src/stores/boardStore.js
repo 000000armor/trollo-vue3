@@ -70,22 +70,10 @@ export const useBoardStore = defineStore({
 
       this.columns.splice(toColumnIndex, 0, columnToMove);
     },
-
     dropItem(payload) {
       payload.type === "task"
-        ? this.dropTask(payload)
-        : this.dropColumn(payload);
-    },
-    dropTask({ fromColumnIndex, toColumnIndex, fromTaskIndex, toTaskIndex }) {
-      this.moveTask({
-        fromColumnIndex,
-        toColumnIndex,
-        fromTaskIndex,
-        toTaskIndex,
-      });
-    },
-    dropColumn({ fromColumnIndex, toColumnIndex }) {
-      this.moveColumn({ fromColumnIndex, toColumnIndex });
+        ? this.moveTask(payload)
+        : this.moveColumn(payload);
     },
   },
 });
