@@ -1,43 +1,50 @@
 <template>
-  <li
-    class="task"
-    @click="goToTask(columnIndex, task.id)"
-    draggable="true"
-    @dragstart.self="
-      pickupTask($event, { taskIndex, fromColumnIndex: columnIndex })
+  <AppDrop
+    @drop="
+      (eventPayload) =>
+        dropItem({
+          toColumnIndex: columnIndex,
+          toTaskIndex: taskIndex,
+          ...eventPayload,
+        })
     "
-    @drop.stop="
-      dropItem($event, {
-        toColumnIndex: columnIndex,
-        toTaskIndex: taskIndex,
-      })
-    "
-    @dragover.prevent
-    @dragenter.prevent
   >
-    <div class="w-full relative">
-      <span class="w-full flex-shrink-0 font-bold">{{ task.name }}</span>
+    <AppDrag
+      :transfer-data="{
+        taskIndex,
+        fromColumnIndex: columnIndex,
+        fromTaskIndex: taskIndex,
+        type: 'task',
+      }"
+      class="task"
+      @click="goToTask(columnIndex, task.id)"
+    >
+      <div class="w-full relative">
+        <span class="w-full flex-shrink-0 font-bold">{{ task.name }}</span>
 
-      <p
-        class="cursor-pointer absolute top-0 right-0"
-        @click.stop="removeTask({ columnIndex, taskId: task.id })"
-      >
-        ❌
+        <p
+          class="cursor-pointer absolute top-0 right-0"
+          @click.stop="removeTask({ columnIndex, taskId: task.id })"
+        >
+          ❌
+        </p>
+      </div>
+      <p class="w-full flex-shrink-0 mt-1 text-sm">
+        {{ task.description }}
       </p>
-    </div>
-    <p class="w-full flex-shrink-0 mt-1 text-sm">
-      {{ task.description }}
-    </p>
-  </li>
+    </AppDrag>
+  </AppDrop>
 </template>
 
 <script setup>
 import { useBoardStore } from "../stores/boardStore";
 import { defineProps } from "vue";
 import { useRouter } from "vue-router";
+import AppDrop from "./AppDrop.vue";
+import AppDrag from "./AppDrag.vue";
 
 const router = useRouter();
-const { removeTask, pickupTask, dropItem } = useBoardStore();
+const { removeTask, dropItem } = useBoardStore();
 
 const goToTask = (columnIndex, taskId) =>
   router.push({ name: "task", params: { columnIndex, taskId } });

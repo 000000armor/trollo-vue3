@@ -70,32 +70,13 @@ export const useBoardStore = defineStore({
 
       this.columns.splice(toColumnIndex, 0, columnToMove);
     },
-    pickupTask(event, { taskIndex, fromColumnIndex }) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.dropEffect = "move";
 
-      event.dataTransfer.setData("task-index", taskIndex);
-      event.dataTransfer.setData("from-column-index", fromColumnIndex);
-      event.dataTransfer.setData("type", "task");
+    dropItem(payload) {
+      payload.type === "task"
+        ? this.dropTask(payload)
+        : this.dropColumn(payload);
     },
-    pickupColumn(event, { fromColumnIndex }) {
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.dropEffect = "move";
-
-      event.dataTransfer.setData("from-column-index", fromColumnIndex);
-      event.dataTransfer.setData("type", "column");
-    },
-    dropItem(event, payload) {
-      const type = event.dataTransfer.getData("type");
-
-      type === "task"
-        ? this.dropTask(event, payload)
-        : this.dropColumn(event, payload);
-    },
-    dropTask(event, { toColumnIndex, toTaskIndex }) {
-      const fromTaskIndex = event.dataTransfer.getData("task-index");
-      const fromColumnIndex = event.dataTransfer.getData("from-column-index");
-
+    dropTask({ fromColumnIndex, toColumnIndex, fromTaskIndex, toTaskIndex }) {
       this.moveTask({
         fromColumnIndex,
         toColumnIndex,
@@ -103,9 +84,7 @@ export const useBoardStore = defineStore({
         toTaskIndex,
       });
     },
-    dropColumn(event, { toColumnIndex }) {
-      const fromColumnIndex = event.dataTransfer.getData("from-column-index");
-
+    dropColumn({ fromColumnIndex, toColumnIndex }) {
       this.moveColumn({ fromColumnIndex, toColumnIndex });
     },
   },

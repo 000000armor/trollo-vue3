@@ -1,41 +1,45 @@
 <template>
-  <div
-    class="column"
-    draggable="true"
-    @dragstart.self="pickupColumn($event, { fromColumnIndex: columnIndex })"
-    @drop="dropItem($event, { toColumnIndex: columnIndex })"
-    @dragover.prevent
-    @dragenter.prevent
+  <AppDrop
+    @drop="
+      (eventPayload) =>
+        dropItem({ toColumnIndex: columnIndex, ...eventPayload })
+    "
   >
-    <h4 class="flex items-center mb-2 font-bold">
-      {{ column.name }}
-    </h4>
+    <AppDrag :transfer-data="{ fromColumnIndex: columnIndex, type: 'column' }">
+      <div class="column">
+        <h4 class="flex items-center mb-2 font-bold">
+          {{ column.name }}
+        </h4>
 
-    <TransitionGroup name="tasks" tag="ul">
-      <BoardTask
-        v-for="(task, taskIndex) in column.tasks"
-        :key="task.id"
-        :task="task"
-        :task-index="taskIndex"
-        :column-index="columnIndex"
-      />
-      <li class="task" key="random-input">
-        <input
-          type="text"
-          class="block p-2 w-full bg-transparent"
-          placeholder="+ Enter new task name"
-          @keyup.enter="createTask($event, { columnIndex })"
-        />
-      </li>
-    </TransitionGroup>
-  </div>
+        <TransitionGroup name="tasks" tag="ul">
+          <BoardTask
+            v-for="(task, taskIndex) in column.tasks"
+            :key="task.id"
+            :column-index="columnIndex"
+            :task="task"
+            :task-index="taskIndex"
+          />
+          <li key="random-input" class="task">
+            <input
+              class="block p-2 w-full bg-transparent"
+              placeholder="+ Enter new task name"
+              type="text"
+              @keyup.enter="createTask($event, { columnIndex })"
+            />
+          </li>
+        </TransitionGroup>
+      </div>
+    </AppDrag>
+  </AppDrop>
 </template>
 
 <script setup>
 import BoardTask from "../components/BoardTask.vue";
 import { useBoardStore } from "../stores/boardStore";
+import AppDrop from "./AppDrop.vue";
+import AppDrag from "./AppDrag.vue";
 
-const { createTask, pickupColumn, dropItem } = useBoardStore();
+const { createTask, dropItem } = useBoardStore();
 
 defineProps({
   column: Object,
