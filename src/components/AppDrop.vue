@@ -8,6 +8,7 @@
 import { defineEmits } from "vue";
 
 const emit = defineEmits(["drop"]);
+
 const handleDrop = (event) => {
   const transferData = JSON.parse(event.dataTransfer.getData("payload"));
 
